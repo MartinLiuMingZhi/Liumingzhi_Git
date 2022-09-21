@@ -1,0 +1,204 @@
+package FILE_1;
+
+import java.io.*;
+import java.nio.file.Files;
+import java.util.Base64;
+import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+class File_demo implements Explorer{
+
+    @Override
+    public void copyFile(File sourceFile, File desFile) throws IOException {
+        Files.copy(sourceFile.toPath(),desFile.toPath());
+    }
+
+    @Override
+    public void delFile(File file) {
+        if (file.exists()){
+            file.delete();
+            System.out.println("文件已删除");
+        }
+    }
+
+    @Override
+    public void shearFile(File sourceFile, File desFile) throws IOException {
+        Files.copy(sourceFile.toPath(),desFile.toPath());
+        sourceFile.delete();
+    }
+
+    @Override
+    public void renameFile(File desFile) {
+        Scanner sc = new Scanner(System.in);
+        String s = sc.nextLine();
+        File file = new File(s);
+        System.out.println(desFile.renameTo(file));
+    }
+
+    @Override
+    public void showFiles(File file) {
+            String[] strArray = file.list();
+            for (String str : strArray){//冒号后面的是要遍历的集合 前面的就是集合每次遍历的对象名称 这就是个循环。。。
+                System.out.println(str);
+            }
+    }
+
+    @Override
+    public void createFile(File desFile, String suffix, String name) throws IOException {
+        File file = null;
+        file = File.createTempFile(name,suffix,desFile);
+    }
+    /**
+     *  1. File.createTempFile(String, String, FILE);
+     *  2. File.createTempFile(String, String);
+     */
+
+    @Override
+    public void encode(File desFile) throws FileNotFoundException, IOException {
+        FileReader fr = new FileReader(desFile);
+        BufferedReader bfr = new BufferedReader(fr);
+
+        String str = null;
+        int lineNumber = 0;
+        while ((str = bfr.readLine()) != null){
+            lineNumber++;
+
+            byte[] bytes = str.getBytes();
+            String encoded = Base64.getEncoder().encodeToString(bytes);
+//            System.out.write(bytes);
+            PrintStream p = new PrintStream(desFile);
+            p.println(str);
+            System.out.println(encoded);
+        }
+        System.out.println("加密成功");
+    }
+
+    @Override
+    public void decode(File desFile) throws IOException {
+        FileReader fr = new FileReader(desFile);
+        BufferedReader bfr = new BufferedReader(fr);
+
+        String str = null;
+        int lineNumber = 0;
+        while ((str = bfr.readLine()) != null){
+            lineNumber++;
+
+            byte[] bytes = str.getBytes();
+            byte[] decoded = Base64.getDecoder().decode(str);
+
+        }
+        System.out.println("解密成功");
+    }
+
+    @Override
+    public void printFile(File file) throws IOException {
+        FileReader fr = new FileReader(file);
+        BufferedReader bfr = new BufferedReader(fr);
+
+        String str = null;
+        int lineNumber = 0;
+        while ((str = bfr.readLine()) != null){
+            lineNumber++;
+            System.out.println(str);
+        }
+    }
+
+    @Override
+    public void writeData(File file, String data) throws IOException {
+        //        FileOutputStream out = null;
+        String str = file.getName();
+        if (!file.exists()){
+            file.createNewFile();
+        }
+        BufferedWriter out = new BufferedWriter(new FileWriter(file));
+        out.write(data);
+        out.close();
+        BufferedReader in = new BufferedReader(new FileReader(file));
+        String s;
+        while ((s = in.readLine())!=null){
+            System.out.println(s);
+        }
+        in.close();
+//        Scanner input = new Scanner(file);
+//        while(input.hasNext()){
+//            String name = input.next();
+//            String sex  = input.next();
+//            int     age = input.nextInt();
+//        }
+//        input.close();
+     }
+
+    @Override
+    public void listFilesMatchRegex(File root, String regex) {
+        File[] tempFile = root.listFiles();
+        int i;
+        for(i = 0;i < tempFile.length;i++){
+            String root_name = tempFile[i].getName();
+            Pattern compile = Pattern.compile(regex);
+            Matcher matcher = compile.matcher(root_name);
+            if (matcher.find()){
+                System.out.println(root_name);
+            }
+        }
+    }
+
+    @Override
+    public void listFilesMatchString(File root, String name) {
+        File[] tempFile = root.listFiles();
+        int i;
+        for(i = 0;i < tempFile.length;i++){
+            if(tempFile[i].getName().contains(name) ){
+                System.out.println(tempFile[i].getName());
+            }
+        }
+    }
+};
+/**
+ * contains() 方法用于判断字符串中是否包含指定的字符或字符串。
+ * 如果包含指定的字符或字符串返回 true，否则返回 false。
+ */
+
+public class file {
+
+    public static void main(String[] args) throws IOException {
+        File f  = new File("E:\\file");
+        System.out.println("file:"+f.createNewFile());//f有文件
+        File f1 = new File("E:\\file1.txt");
+        System.out.println("file1:"+f1.createNewFile());//f1有
+        File f2 = new File("E:\\file2.txt");
+        File f3 = new File("E:\\file3.txt");
+        System.out.println(f3.createNewFile());
+        File f4 = new File("E:\\file4.txt");
+        File f5 = new File("E:\\file5.txt");
+        System.out.println("file4:"+f5.createNewFile());//f5有
+        File_demo demo = new File_demo();
+        if (!f2.exists()) {
+            demo.copyFile(f1, f2);//复制（ac) f2有
+        }
+        if (!f3.exists()){
+            demo.shearFile(f3,f4);//剪切(ac) f3没了 f4有
+        }
+        demo.delFile(f5);   //删除(ac) f5没了
+        demo.copyFile(f3,f5);
+        System.out.println("请给file5重命名:(绝对路径名）");
+        demo.renameFile(f5);//重命名(ac) 测试：E://demo.txt
+        demo.showFiles(f);//打印文件夹中文件名(ac)
+        demo.createFile(f,"txt","demo_1");//在文件夹中创建临时文件(ac)
+        Scanner sc = new Scanner(System.in);
+        System.out.println("请输入你要添加的内容：");
+        String str = sc.nextLine();
+        demo.writeData(f1,str);
+        demo.printFile(f1);//打印文件内容(ac)
+        System.out.println("请输入查找的名称:");
+        String  s  = sc.nextLine();
+        demo.listFilesMatchString(f,s);//模糊查找(ac) 测试：Java
+        demo.listFilesMatchRegex(f,s);//正则运算查找(ac)
+        demo.encode(f1);//base64加密
+        demo.printFile(f1);
+        demo.decode(f1);
+        demo.printFile(f1);//加密解密不是很明白
+    }
+}
+
+
